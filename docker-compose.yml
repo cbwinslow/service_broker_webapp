@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  postgres_db:
+    image: postgres:15 # Use a specific version
+    container_name: project_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-user} # Use .env file or defaults
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-servicedb}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persist data
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+  redis_cache:
+    image: redis:7 # Use a specific version
+    container_name: project_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+  # Add backend, frontend, potentially worker/crawler services here later
+  # Example Backend Placeholder:
+  # backend:
+  #   build: ./backend # Path to backend Dockerfile context
+  #   container_name: project_backend
+  #   ports:
+  #     - "${BACKEND_PORT:-3000}:3000"
+  #   depends_on:
+  #     - postgres_db
+  #     - redis_cache
+  #   environment:
+  #     - DATABASE_URL=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD:-password}@postgres_db:5432/${POSTGRES_DB:-servicedb}
+  #     - REDIS_URL=redis://redis_cache:6379
+  #     # Add other necessary env vars
+  #   volumes:
+  #     - ./backend:/usr/src/app # Mount code for development hot-reloading
+  #     - /usr/src/app/node_modules # Don't mount node_modules
+  #   networks:
+  #     - app-network
+  #   command: yarn dev # Or npm run dev
+
+volumes:
+  postgres_data: # Define the named volume
+
+networks:
+  app-network:
+    driver: bridge
